@@ -8,15 +8,12 @@
 
 typedef struct __element {
     char *value;
-    struct __element *next;
     struct list_head list;
 } list_ele_t;
 
 typedef struct {
-    list_ele_t *head; /* Linked list of elements */
-    list_ele_t *tail;
     size_t size;
-    struct list_head list;
+    struct list_head list; /* Linked list of elements */
 } queue_t;
 
 static list_ele_t *get_middle(struct list_head *list)
@@ -89,7 +86,6 @@ static queue_t *q_new()
     if (!q)
         return NULL;
 
-    q->head = q->tail = NULL;
     q->size = 0;
     INIT_LIST_HEAD(&q->list);
     return q;
@@ -100,10 +96,9 @@ static void q_free(queue_t *q)
     if (!q)
         return;
 
-    list_ele_t *current = q->head;
-    while (current) {
-        list_ele_t *tmp = current;
-        current = current->next;
+    struct list_head *current, *next;
+    list_for_each_safe (current, next, &q->list) {
+        list_ele_t *tmp = list_entry(current, list_ele_t, list);
         free(tmp->value);
         free(tmp);
     }
@@ -126,10 +121,6 @@ bool q_insert_head(queue_t *q, char *s)
     }
 
     newh->value = new_value;
-    newh->next = q->head;
-    q->head = newh;
-    if (q->size == 0)
-        q->tail = newh;
     q->size++;
     list_add_tail(&newh->list, &q->list);
 
