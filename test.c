@@ -16,7 +16,7 @@ typedef struct {
     struct list_head list; /* Linked list of elements */
 } queue_t;
 
-static list_ele_t *get_middle(struct list_head *list)
+static struct list_head *get_middle(struct list_head *list)
 {
     struct list_head *fast = list->next, *slow;
     list_for_each (slow, list) {
@@ -24,7 +24,7 @@ static list_ele_t *get_middle(struct list_head *list)
             break;
         fast = fast->next->next;
     }
-    return list_entry(slow, list_ele_t, list);
+    return slow;
 }
 
 static void list_merge(struct list_head *lhs,
@@ -59,7 +59,7 @@ void list_merge_sort(queue_t *q)
     queue_t left;
     struct list_head sorted;
     INIT_LIST_HEAD(&left.list);
-    list_cut_position(&left.list, &q->list, &get_middle(&q->list)->list);
+    list_cut_position(&left.list, &q->list, get_middle(&q->list));
     list_merge_sort(&left);
     list_merge_sort(q);
     list_merge(&left.list, &q->list, &sorted);
